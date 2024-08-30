@@ -1,0 +1,137 @@
+MODULE Main;
+REQUIRE Time, Authentication;
+//---------------------предметы------------------
+CLASS Subjects 'Предмет';
+name 'Наименование' = DATA STRING[25] (Subjects) NONULL ;
+isSign 'Профиль' = DATA BOOLEAN (Subjects)  ;
+
+//проверка на уникальность
+unique  = GROUP AGGR Subjects o BY name(o);
+
+FORM viewSubjects 'Предметы'
+    OBJECTS s = Subjects
+    PROPERTIES (s) READONLY name, isSign
+    PROPERTIES (s) NEWSESSION NEW, EDIT ,DELETE
+;
+FORM editSubject 'Предмет'
+    OBJECTS s = Subjects PANEL  //опция PANEL - только одна запись
+    PROPERTIES (s) name, isSign
+    EDIT Subjects OBJECT s
+;
+
+//эта форма будет выводиться как справочник
+FORM listSubject 'Предметы'
+    OBJECTS s = Subjects
+    PROPERTIES (s) READONLY name
+    LIST Subjects OBJECT s
+;
+//---------------учителя-------------------------------
+
+CLASS Teachers 'Учителя';
+surname 'Фамилия' = DATA STRING[16] (Teachers) NONULL ;
+firstName 'Имя' = DATA STRING[16] (Teachers) NONULL ;
+lastName 'Отчество' = DATA STRING[16] (Teachers) NONULL ;
+
+fullName 'учителя' (Teachers t) = CONCAT ' ', surname(t), firstName(t),lastName(t);
+
+//ссылка на предметы
+subject = DATA Subjects (Teachers);
+//ссылка на учителей
+teacher = DATA Teachers (Class);
+//композиция
+subjectName 'Ведет предмет' (Teachers t) = name(subject(t));
+
+FORM viewTeachers 'Учителя'
+    OBJECTS t = Teachers
+    PROPERTIES (t) READONLY fullName, subjectName
+    PROPERTIES (t) NEWSESSION NEW
+;
+FORM editTeacher 'Добавлениие учителя'
+    OBJECTS t = Teachers PANEL
+    PROPERTIES (t) surname, firstName, lastName
+    EDIT Teachers OBJECT t
+;
+
+//------------------классы--------------------
+
+CLASS Class 'Класс';
+
+number 'Номер' = DATA INTEGER (Class)NONULL ;
+letter 'Буква' = DATA STRING[1] (Class) NONULL ;
+isSign 'Профиль' = DATA BOOLEAN (Class);
+classTeacher 'Классный руководитель1' = DATA STRING[50] (Class)  ;
+numberAndLetter 'Класс' (Class c) = CONCAT '', number(c), letter(c);
+
+
+FORM viewClasses 'Классы'
+    OBJECTS  c = Class
+    PROPERTIES (c) READONLY numberAndLetter, isSign, classTeacher
+    PROPERTIES  (c) NEWSESSION NEW , EDIT , DELETE
+;
+
+FORM editClass 'Класс'
+    OBJECTS c = Class PANEL
+    PROPERTIES (c)  number, letter, isSign
+    PROPERTIES (c) classTeacher
+    EDIT Class OBJECT c
+;
+
+EXTEND FORM editTeacher
+    PROPERTIES (t) subjectName
+
+;
+
+DESIGN editClass{
+    OBJECTS {
+        NEW cntClass{
+            horizontal = TRUE ;
+            height = 120;
+            //MOVE PROPERTY ({caption = 'Классный руководитель4';}
+        }
+    }
+}
+//----------------дизайн форм----------------------
+DESIGN editSubject
+{
+    OBJECTS
+    {
+        NEW cntNameForm
+        {
+            caption = 'Добавить предмет';
+        }
+        NEW cntDoc
+        {
+            horizontal = TRUE ;
+            caption = 'Предмет';
+            height = 60;
+            MOVE PROPERTY (name(s));
+            caption = 'Профиль';
+            MOVE PROPERTY (isSign(s));
+        }
+
+    }
+}
+
+DESIGN editTeacher{
+    OBJECTS {
+        NEW cntSab  {
+            horizontal = TRUE ;
+            caption = 'Ведет предмет';
+            height = 60;
+            MOVE PROPERTY (subjectName(t)) {caption = 'Предмет';}
+        }
+    }
+}
+NAVIGATOR {
+    NEW FOLDER move 'Справочник' WINDOW toolbar FIRST {
+        NEW FORM viewSubjects;
+        NEW FORM viewClasses;
+        NEW FORM viewTeachers;
+    }
+}
+
+
+
+
+
+

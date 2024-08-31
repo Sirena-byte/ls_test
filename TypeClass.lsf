@@ -1,0 +1,24 @@
+MODULE TypeClass;
+REQUIRE Students;
+
+//----------------тип класса (начальные классы, старшие классы--------------------
+CLASS EducationType 'Ступень' {
+    primaryEducation 'Учитель начальных классов',
+    basicAndSecondaryEducation 'Учитель старших классов'
+
+
+}
+educationType 'ID' = DATA EducationType (Teachers) NONULL ;
+educationTypeName 'Тип получения образования' (Teachers t) = staticCaption(educationType(t));
+
+EXTEND FORM viewTeachers
+    PROPERTIES (t) READONLY educationTypeName
+;
+EXTEND FORM editTeacher
+    PROPERTIES (t) educationTypeName
+;
+CONSTRAINT SETCHANGED (teacher(Subjects t)) AND
+    NOT educationType(teacher(t)) = EducationType.basicAndSecondaryEducation
+    CHECKED BY teacher[Subjects]
+    MESSAGE 'Учитель не является учителем старших классов';
+

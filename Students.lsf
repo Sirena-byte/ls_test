@@ -1,0 +1,33 @@
+MODULE Students;
+REQUIRE Teatchers;
+
+CLASS Students 'Ученики';
+
+surname 'Фамилия' = DATA STRING[16] (Students) NONULL ;
+firstNume 'Имя' = DATA STRING[16] (Students) NONULL ;
+lastName 'Отчество' = DATA STRING[16] (Students) NONULL ;
+
+fullName 'Полное имя' (Students s) = CONCAT ' ', surname(s), firstNume(s),lastName(s);
+countStudents 'Количество учеников в классе' = GROUP SUM 1 BY numberAndLetter(Class c);
+
+numberClass 'Номер класса' = DATA Class(Students);
+number 'Класс' (Students s) = numberAndLetter(numberClass(s));
+
+pp 'Номер ученика в классе' (Students s) = PARTITION SUM 1 ORDER s BY number(s);
+
+FORM viewStudents 'Ученики'
+    OBJECTS s = Students
+    PROPERTIES (s) fullName, number,  pp
+    PROPERTIES (s) NEWSESSION NEW , EDIT ,DELETE ;
+
+FORM editStudent 'Добавить ученика'
+    OBJECTS s = Students
+    PROPERTIES (s) surname, firstNume, lastName
+    PROPERTIES (s) number
+    EDIT Students OBJECT s;
+
+NAVIGATOR {
+    students{
+        NEW FORM viewStudents;
+    }
+}

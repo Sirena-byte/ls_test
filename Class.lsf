@@ -1,0 +1,44 @@
+MODULE Class;
+REQUIRE Subjects;
+//------------------классы--------------------
+
+CLASS Class 'Класс';
+
+number 'Номер' = DATA INTEGER (Class)NONULL ;
+letter 'Буква' = DATA STRING[1] (Class) NONULL ;
+isSign 'Профиль' = DATA BOOLEAN (Class);
+numberAndLetter 'Класс' (Class c) = CONCAT '', number(c), letter(c);
+
+
+
+FORM viewClasses 'Классы'
+    OBJECTS  c = Class
+    PROPERTIES (c) READONLY numberAndLetter, isSign
+    PROPERTIES  (c) NEWSESSION NEW , EDIT , DELETE
+;
+
+FORM editClass 'Класс'
+    OBJECTS c = Class PANEL
+    PROPERTIES (c)  number, letter, isSign
+    EDIT Class OBJECT c
+;
+FORM listClass 'Класс'
+    OBJECTS c = Class
+    PROPERTIES (c) READONLY numberAndLetter
+    LIST Class OBJECT c
+;
+
+DESIGN editClass{
+    OBJECTS {
+        NEW cntClass{
+            horizontal = TRUE ;
+            height = 120;
+            //MOVE PROPERTY ({caption = 'Классный руководитель4';}
+        }
+    }
+}
+NAVIGATOR {
+    classes{
+        NEW FORM viewClasses;
+    }
+}

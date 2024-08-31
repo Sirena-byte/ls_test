@@ -1,0 +1,51 @@
+MODULE Teatchers;
+REQUIRE Class;
+
+//---------------учителя-------------------------------
+
+CLASS Teachers 'Учителя';
+surname 'Фамилия' = DATA STRING[16] (Teachers) NONULL ;
+firstName 'Имя' = DATA STRING[16] (Teachers) NONULL ;
+lastName 'Отчество' = DATA STRING[16] (Teachers) NONULL ;
+
+fullName 'учителя' (Teachers t) = CONCAT ' ', surname(t), firstName(t),lastName(t);
+
+//ссылка на предметы
+subject = DATA Subjects (Teachers);
+//ссылка на классного руководителя
+teacherClass = DATA Teachers (Class);
+//ссылка на учителя
+teacher = DATA Teachers(Subjects);
+
+//композиция
+subjectName 'Ведет предмет' (Teachers t) = name(subject(t));
+classTeacher 'Классный руководитель' (Class c) = fullName(teacherClass(c));
+
+FORM viewTeachers 'Учителя'
+    OBJECTS t = Teachers
+    PROPERTIES (t) READONLY fullName, subjectName
+    PROPERTIES (t) NEWSESSION NEW, EDIT ,DELETE
+;
+FORM editTeacher 'Добавлениие учителя'
+    OBJECTS t = Teachers PANEL
+    PROPERTIES (t) surname, firstName, lastName
+    PROPERTIES (t) subjectName
+    EDIT Teachers OBJECT t
+;
+
+DESIGN editTeacher{
+    OBJECTS {
+        NEW cntSab  {
+            horizontal = TRUE ;
+            caption = 'Ведет предмет';
+            height = 60;
+            MOVE PROPERTY (subjectName(t)) {caption = 'Предмет';}
+        }
+    }
+}
+
+NAVIGATOR {
+    teatchers{
+        NEW FORM viewTeachers;
+    }
+}

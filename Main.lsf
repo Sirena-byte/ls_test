@@ -1,5 +1,5 @@
 MODULE Main;
-REQUIRE Time, Authentication;
+
 //---------------------предметы------------------
 CLASS Subjects 'Предмет';
 name 'Наименование' = DATA STRING[25] (Subjects) NONULL ;
@@ -36,19 +36,24 @@ fullName 'учителя' (Teachers t) = CONCAT ' ', surname(t), firstName(t),la
 
 //ссылка на предметы
 subject = DATA Subjects (Teachers);
-//ссылка на учителей
-teacher = DATA Teachers (Class);
+//ссылка на классного руководителя
+teacherClass = DATA Teachers (Class);
+//ссылка на учителя
+teacher = DATA Teachers(Subjects);
+
 //композиция
 subjectName 'Ведет предмет' (Teachers t) = name(subject(t));
+classTeacher 'Классный руководитель' (Class c) = fullName(teacherClass(c));
 
 FORM viewTeachers 'Учителя'
     OBJECTS t = Teachers
     PROPERTIES (t) READONLY fullName, subjectName
-    PROPERTIES (t) NEWSESSION NEW
+    PROPERTIES (t) NEWSESSION NEW, EDIT ,DELETE 
 ;
 FORM editTeacher 'Добавлениие учителя'
     OBJECTS t = Teachers PANEL
     PROPERTIES (t) surname, firstName, lastName
+    PROPERTIES (t) subjectName
     EDIT Teachers OBJECT t
 ;
 
@@ -59,8 +64,8 @@ CLASS Class 'Класс';
 number 'Номер' = DATA INTEGER (Class)NONULL ;
 letter 'Буква' = DATA STRING[1] (Class) NONULL ;
 isSign 'Профиль' = DATA BOOLEAN (Class);
-classTeacher 'Классный руководитель1' = DATA STRING[50] (Class)  ;
 numberAndLetter 'Класс' (Class c) = CONCAT '', number(c), letter(c);
+
 
 
 FORM viewClasses 'Классы'
@@ -76,10 +81,6 @@ FORM editClass 'Класс'
     EDIT Class OBJECT c
 ;
 
-EXTEND FORM editTeacher
-    PROPERTIES (t) subjectName
-
-;
 
 DESIGN editClass{
     OBJECTS {
@@ -90,17 +91,41 @@ DESIGN editClass{
         }
     }
 }
+//----------------ученик класса--------------------
+
+
+//----------------тип класса (начальные классы, старшие классы--------------------
+CLASS EducationType 'Ступень' {
+    primaryEducation 'Учитель начальных классов',
+    basicAndSecondaryEducation 'Учитель старших классов'
+
+    
+}
+educationType 'ID' = DATA EducationType (Teachers) NONULL ;
+educationTypeName 'Тип получения образования' (Teachers t) = staticCaption(educationType(t));
+
+EXTEND FORM viewTeachers
+    PROPERTIES (t) READONLY educationTypeName
+    ;
+EXTEND FORM editTeacher
+    PROPERTIES (t) educationTypeName
+    ;
+CONSTRAINT SETCHANGED(teacher(Subjects t)) AND
+    NOT educationType(teacher(t)) = EducationType.basicAndSecondaryEducation
+    CHECKED BY teacher[Subjects]
+    MESSAGE 'Учитель не является учителем старших классов';
+
+FORM static 'Статические объекты'
+    OBJECTS o = EducationType
+    PROPERTIES (o) staticName, staticCaption
+    PROPERTIES (o) NEW , DELETE 
+    ;
+
 //----------------дизайн форм----------------------
-DESIGN editSubject
-{
-    OBJECTS
-    {
-        NEW cntNameForm
-        {
-            caption = 'Добавить предмет';
-        }
-        NEW cntDoc
-        {
+DESIGN editSubject{
+    OBJECTS{
+        NEW cntNameForm { caption = 'Добавить предмет';}
+        NEW cntDoc{
             horizontal = TRUE ;
             caption = 'Предмет';
             height = 60;
@@ -108,7 +133,6 @@ DESIGN editSubject
             caption = 'Профиль';
             MOVE PROPERTY (isSign(s));
         }
-
     }
 }
 
@@ -127,6 +151,7 @@ NAVIGATOR {
         NEW FORM viewSubjects;
         NEW FORM viewClasses;
         NEW FORM viewTeachers;
+        NEW FORM static;
     }
 }
 

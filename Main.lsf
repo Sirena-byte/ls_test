@@ -80,7 +80,11 @@ FORM editClass 'Класс'
     PROPERTIES (c) classTeacher
     EDIT Class OBJECT c
 ;
-
+FORM listClass 'Класс'
+    OBJECTS c = Class
+    PROPERTIES (c) READONLY numberAndLetter
+    LIST Class OBJECT c
+;
 
 DESIGN editClass{
     OBJECTS {
@@ -92,6 +96,30 @@ DESIGN editClass{
     }
 }
 //----------------ученик класса--------------------
+CLASS Students 'Ученики';
+
+surname 'Фамилия' = DATA STRING[16] (Students) NONULL ;
+firstNume 'Имя' = DATA STRING[16] (Students) NONULL ;
+lastName 'Отчество' = DATA STRING[16] (Students) NONULL ;
+
+fullName 'Полное имя' (Students s) = CONCAT ' ', surname(s), firstNume(s),lastName(s);
+countStudents 'Количество учеников в классе' = GROUP SUM 1 BY numberAndLetter(Class c);
+
+numberClass 'Номер класса' = DATA Class(Students);
+number 'Класс' (Students s) = numberAndLetter(numberClass(s));
+
+pp 'Номер ученика в классе' (Students s) = PARTITION SUM 1 ORDER s BY number(s);
+
+FORM viewStudents 'Ученики'
+    OBJECTS s = Students
+    PROPERTIES (s) fullName, number,  pp
+    PROPERTIES (s) NEWSESSION NEW , EDIT ,DELETE ;
+
+FORM editStudent 'Добавить ученика'
+    OBJECTS s = Students
+    PROPERTIES (s) surname, firstNume, lastName
+    PROPERTIES (s) number
+    EDIT Students OBJECT s;
 
 
 //----------------тип класса (начальные классы, старшие классы--------------------
@@ -114,12 +142,6 @@ CONSTRAINT SETCHANGED(teacher(Subjects t)) AND
     NOT educationType(teacher(t)) = EducationType.basicAndSecondaryEducation
     CHECKED BY teacher[Subjects]
     MESSAGE 'Учитель не является учителем старших классов';
-
-FORM static 'Статические объекты'
-    OBJECTS o = EducationType
-    PROPERTIES (o) staticName, staticCaption
-    PROPERTIES (o) NEW , DELETE 
-    ;
 
 //----------------дизайн форм----------------------
 DESIGN editSubject{
@@ -151,7 +173,7 @@ NAVIGATOR {
         NEW FORM viewSubjects;
         NEW FORM viewClasses;
         NEW FORM viewTeachers;
-        NEW FORM static;
+        NEW FORM viewStudents;
     }
 }
 

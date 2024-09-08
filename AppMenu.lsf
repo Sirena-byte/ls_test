@@ -5,7 +5,12 @@ NAVIGATOR {
         NEW FOLDER subjects 'Предметы';
         NEW FOLDER classes 'Классы';
         NEW FOLDER teatchers 'Учителя';
+        NEW FOLDER student 'Ученики';
+      
+    }
+    NEW FOLDER classSt 'Ученики класса' WINDOW toolbar AFTER move{
         NEW FOLDER students 'Ученики';
     }
 }
+
 

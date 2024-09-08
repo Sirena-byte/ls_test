@@ -1,0 +1,16 @@
+MODULE ClassDocument;
+
+REQUIRE Teatchers, Class;
+CLASS ABSTRACT Header 'Заголовок документа';
+
+classes 'Классы' = DATA Class(Header);
+class 'Класс' (Header h) = numberAndLetter(classes(h));
+teacherClass = DATA Teacher (Header);
+classTeacher 'Классный руководитель' (Header h) = fullName(teacherClass(h));
+
+CLASS ABSTRACT Row 'Строки документа';
+
+//связываем строки документа с его заголовком
+header 'ID шапки' = DATA Header(Row);
+
+

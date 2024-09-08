@@ -1,33 +1,60 @@
 MODULE Students;
-REQUIRE Teatchers;
+REQUIRE Teatchers, ClassDocument;
 
-CLASS Students 'Ученики';
+NAMESPACE ClassDocument;
+
+CLASS NumberClassStudent 'Класс ученика': Header;
+
+//ссылка на класс
+numberClass 'Номер класса' = DATA Class(NumberClassStudent);
+number 'Класс' (NumberClassStudent s) = numberAndLetter(numberClass(s));
+isSingClass 'Является ли профильным'(NumberClassStudent s) = isSign(numberClass(s));
+classTeach 'Классный руководитель'(NumberClassStudent s) = classTeacher(numberClass(s));
+
+//countStudents 'Количество учеников в классе'(NumberClassStudent) = GROUP SUM 1 BY numberAndLetter(NumberClassStudent s);
+CLASS Students 'Ученики' : Row;
 
 surname 'Фамилия' = DATA STRING[16] (Students) NONULL ;
 firstNume 'Имя' = DATA STRING[16] (Students) NONULL ;
 lastName 'Отчество' = DATA STRING[16] (Students) NONULL ;
 
-fullName 'Полное имя' (Students s) = CONCAT ' ', surname(s), firstNume(s),lastName(s);
-countStudents 'Количество учеников в классе' = GROUP SUM 1 BY numberAndLetter(Class c);
+fullName 'Ученик' (Students s) = CONCAT ' ', surname(s), firstNume(s),lastName(s);
+//numberClass 'Класс' = DATA Students(Class);
 
-numberClass 'Номер класса' = DATA Class(Students);
-number 'Класс' (Students s) = numberAndLetter(numberClass(s));
 
-pp 'Номер ученика в классе' (Students s) = PARTITION SUM 1 ORDER s BY number(s);
 
-FORM viewStudents 'Ученики'
-    OBJECTS s = Students
-    PROPERTIES (s) fullName, number,  pp
-    PROPERTIES (s) NEWSESSION NEW , EDIT ,DELETE ;
+//pp 'Номер ученика в классе' (Students s) = PARTITION SUM 1 ORDER s BY number(s);
 
-FORM editStudent 'Добавить ученика'
-    OBJECTS s = Students
-    PROPERTIES (s) surname, firstNume, lastName
-    PROPERTIES (s) number
-    EDIT Students OBJECT s;
+FORM editStudents 'Ученики'
+    OBJECTS h = NumberClassStudent PANEL 
+    PROPERTIES (h) number
+    OBJECTS r = Students 
+    PROPERTIES (r) surname, firstNume,lastName 
+    PROPERTIES (r) NEW ,DELETE 
+    EDIT NumberClassStudent OBJECT h
+    FILTERS header(r) = h
+    ;
+
+FORM viewStudent 'Добавить ученика'
+    OBJECTS h = NumberClassStudent LAST 
+    PROPERTIES (h) READONLY number, isSingClass, classTeach
+    PROPERTIES (h) NEWSESSION NEW ,EDIT ,DELETE 
+    OBJECTS r = Students
+    PROPERTIES (r) surname, firstNume, lastName
+    FILTERS header(r) = h
+    ORDERS number(h)
+    ;
+FORM viewStudents 'Ученики школы'
+    OBJECTS s = NumberClassStudent
+    OBJECTS st = Students
+    PROPERTIES (s) number, isSingClass,classTeacher
+    PROPERTIES (st) fullName
+    ;
+DESIGN viewStudent {TOOLBARRIGHT (r){MOVE TOOLBARRIGHT (h);}}
 
 NAVIGATOR {
     students{
-        NEW FORM viewStudents;
+        NEW FORM viewStudent;
     }
+
 }

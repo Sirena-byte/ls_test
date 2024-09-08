@@ -4,7 +4,7 @@ REQUIRE AppMenu;
 CLASS Subjects 'Предмет';
 name 'Наименование' = DATA STRING[25] (Subjects) NONULL ;
 isSign 'Профиль' = DATA BOOLEAN (Subjects)  ;
-
+isHighSchool 'Старшие классы' = DATA BOOLEAN (Subjects);
 //проверка на уникальность
 unique  = GROUP AGGR Subjects o BY name(o);
 

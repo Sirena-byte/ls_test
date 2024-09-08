@@ -1,37 +1,58 @@
 MODULE Teatchers;
-REQUIRE Class;
+REQUIRE  Subjects, AppMenu;
 
+
+CLASS TeacherType 'Тип учителя'{
+    primaryEducation 'Учитель начальных классов',
+    basicAndSecondaryEducation 'Учитель старших классов'
+} 
 //---------------учителя-------------------------------
 
-CLASS Teachers 'Учителя';
-surname 'Фамилия' = DATA STRING[16] (Teachers) NONULL ;
-firstName 'Имя' = DATA STRING[16] (Teachers) NONULL ;
-lastName 'Отчество' = DATA STRING[16] (Teachers) NONULL ;
-
-fullName 'учителя' (Teachers t) = CONCAT ' ', surname(t), firstName(t),lastName(t);
+CLASS Teacher 'Учителя';
+surname 'Фамилия' = DATA STRING[16] (Teacher) NONULL ;
+firstName 'Имя' = DATA STRING[16] (Teacher) NONULL ;
+lastName 'Отчество' = DATA STRING[16] (Teacher) NONULL ;
+fullName 'учителя' (Teacher t) = CONCAT ' ', surname(t), firstName(t),lastName(t);
 
 //ссылка на предметы
-subject = DATA Subjects (Teachers);
-//ссылка на классного руководителя
-teacherClass = DATA Teachers (Class);
-//ссылка на учителя
-teacher = DATA Teachers(Subjects);
+subject = DATA Subjects (Teacher);
 
-//композиция
-subjectName 'Ведет предмет' (Teachers t) = name(subject(t));
-classTeacher 'Классный руководитель' (Class c) = fullName(teacherClass(c));
+//ссылка на учителя
+teacher = DATA Teacher(Subjects);
+
+subjectName 'Ведет предмет' (Teacher t) = name(subject(t));
+
+teacherType 'ID' = DATA TeacherType (Teacher) NONULL ;
+teacherTypeName 'Тип учителя' (Teacher t) = staticCaption(teacherType(t));//??????
+
+
 
 FORM viewTeachers 'Учителя'
-    OBJECTS t = Teachers
+    OBJECTS t = Teacher
     PROPERTIES (t) READONLY fullName, subjectName
     PROPERTIES (t) NEWSESSION NEW, EDIT ,DELETE
 ;
+EXTEND FORM viewTeachers
+    PROPERTIES (t) READONLY teacherTypeName
+    ;
 FORM editTeacher 'Добавлениие учителя'
-    OBJECTS t = Teachers PANEL
+    OBJECTS t = Teacher PANEL
     PROPERTIES (t) surname, firstName, lastName
     PROPERTIES (t) subjectName
-    EDIT Teachers OBJECT t
+    EDIT Teacher OBJECT t
 ;
+EXTEND FORM editTeacher
+    PROPERTIES (t)teacherTypeName;
+
+CONSTRAINT SETCHANGED(teacher(Subjects t)) AND 
+     teacherType(teacher(t)) = TeacherType.primaryEducation
+    MESSAGE 'Профильным учителем может являться только учитель старших классов';
+
+FORM listTeacher 'Учителя'
+    OBJECTS t = Teacher
+    PROPERTIES (t) READONLY fullName
+    LIST Teacher OBJECT t
+    ;
 
 DESIGN editTeacher{
     OBJECTS {

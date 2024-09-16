@@ -49,6 +49,7 @@ FORM viewStudents 'Ученики школы'
     OBJECTS st = Students
     PROPERTIES (s) number, isSingClass,classTeacher
     PROPERTIES (st) fullName
+    FILTERS header(st) = s
     ;
 DESIGN viewStudent {TOOLBARRIGHT (r){MOVE TOOLBARRIGHT (h);}}
 
@@ -56,5 +57,4 @@ NAVIGATOR {
     students{
         NEW FORM viewStudent;
     }
-
 }

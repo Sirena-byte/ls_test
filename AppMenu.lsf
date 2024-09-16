@@ -11,6 +11,7 @@ NAVIGATOR {
     NEW FOLDER classSt 'Ученики класса' WINDOW toolbar AFTER move{
         NEW FOLDER students 'Ученики';
     }
+    
 }
 
 

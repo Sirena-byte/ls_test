@@ -1,75 +1,60 @@
 MODULE Teatchers;
 REQUIRE  Subjects, AppMenu, Utils;
 
-
 CLASS TeacherType 'Тип учителя'{
     primaryEducation 'Учитель начальных классов',
     basicAndSecondaryEducation 'Учитель старших классов'
 }
-//---------------учителя-------------------------------
 
 CLASS Teacher 'Учителя';
 surname 'Фамилия' = DATA STRING[16] (Teacher) NONULL ;
 firstName 'Имя' = DATA STRING[16] (Teacher) NONULL ;
 lastName 'Отчество' = DATA STRING[16] (Teacher) NONULL ;
-fullName 'учителя' (Teacher t) = CONCAT ' ', surname(t), firstName(t),lastName(t);
-sub = DATA Object (Teacher);
+fullName 'учителя' (Teacher teacher) = CONCAT ' ', surname(teacher), firstName(teacher),lastName(teacher);
+
+teacherType 'ID' = DATA TeacherType (Teacher) NONULL ;
+teacherTypeName 'Тип учителя' (Teacher teacher) = staticCaption(teacherType(teacher));
 
 //ссылка на предметы
 subject = DATA Subjects(Teacher);
-
 //ссылка на учителя
 teacher = DATA Teacher(Subjects) ;
 
 subjectName 'Ведет предмет' (Teacher t) = name(subject(t)) ;
-
-//subjectName 'Ведет предмет' (Teacher t) = IF COUNT(subject(t)) > 0 THEN name(subject(t)[1]) ELSE '';
-
-teacherType 'ID' = DATA TeacherType (Teacher) NONULL ;
-teacherTypeName 'Тип учителя' (Teacher t) = staticCaption(teacherType(t));//??????
-
-CLASS Line 'Строка';
-line 'Документ' = DATA Teacher(Line);
-sub 'Предметы' = DATA Subjects(Line);
-nameSub 'Предмет' (Line l)= name(sub(l));
-countLine 'Количество предметов' (co)
+in 'ВКЛ' = DATA BOOLEAN (Teacher,Subjects) IN base;
+subjectaT 'Предметы учителя' (Teacher t) = GROUP CONCAT name(Subjects s) IF in(t, s),' ,'
+ORDER name(s), t CHARWIDTH 30;
 
 FORM viewTeachers 'Учителя'
-    OBJECTS t = Teacher
-    PROPERTIES (t) READONLY fullName, subjectName
-   
-    PROPERTIES (t) NEWSESSION NEW, EDIT ,DELETE
-    OBJECTS l = Line
-    PROPERTIES (l) READONLY nameSub
-    //FILTERS line(l) = t
-    //ORDERS 
+    OBJECTS teacher = Teacher
+    PROPERTIES (teacher) READONLY fullName, subjectaT //subjectName
+    PROPERTIES (teacher) NEWSESSION NEW, EDIT ,DELETE
+
 ;
 EXTEND FORM viewTeachers
-    PROPERTIES (t) READONLY teacherTypeName
+    PROPERTIES (teacher) READONLY teacherTypeName
 ;
 FORM editTeacher 'Добавлениие учителя'
     OBJECTS t = Teacher PANEL
     PROPERTIES (t) surname, firstName, lastName
-    //PROPERTIES (t) subjectName
 
-    OBJECTS l = Line
-    PROPERTIES (l) nameSub
-    PROPERTIES (l) NEW , DELETE 
-    
+    OBJECTS s = Subjects
+    PROPERTIES in(t,s)
+    PROPERTIES (s) name
     EDIT Teacher OBJECT t
 ;
 
 EXTEND FORM editTeacher
     PROPERTIES (t)teacherTypeName;
 
-CONSTRAINT SETCHANGED(teacher(Subjects t)) AND
-    teacherType(teacher(t)) = TeacherType.primaryEducation
-    MESSAGE 'Профильным учителем может являться только учитель старших классов';
+//CONSTRAINT SETCHANGED(teacher(Subjects t)) AND
+//    teacherType(teacher(t)) = TeacherType.primaryEducation
+//    MESSAGE 'Профильным учителем может являться только учитель старших классов';
 
 FORM listTeacher 'Учителя'
-    OBJECTS t = Teacher
-    PROPERTIES (t) READONLY fullName
-    LIST Teacher OBJECT t
+    OBJECTS teacher = Teacher
+    PROPERTIES (teacher) READONLY fullName
+    LIST Teacher OBJECT teacher
 ;
 
 DESIGN editTeacher{

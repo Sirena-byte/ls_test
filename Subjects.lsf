@@ -3,20 +3,19 @@ REQUIRE AppMenu;
 //---------------------предметы------------------
 CLASS Subjects 'Предмет';
 name 'Название предмета' = DATA STRING[25] (Subjects) NONULL ;
-isSign 'Профиль' = DATA BOOLEAN (Subjects)  ;
+isProfileSubject 'Профильный предмет' = DATA BOOLEAN (Subjects) ;
 //isHighSchool 'Старшие классы' = DATA BOOLEAN (Subjects);
 //проверка на уникальность
 unique  = GROUP AGGR Subjects o BY name(o);
-
-
+//isSingClass 'Является ли профильным'(NumberClassStudent s) = isSignClass(numberClass(s));
 FORM viewSubjects 'Предметы'
     OBJECTS s = Subjects
-    PROPERTIES (s) READONLY isSign, name
+    PROPERTIES (s) READONLY isProfileSubject, name
     PROPERTIES (s) NEWSESSION NEW, EDIT ,DELETE
 ;
 FORM editSubject 'Предмет'
     OBJECTS s = Subjects PANEL  //опция PANEL - только одна запись
-    PROPERTIES (s) name, isSign
+    PROPERTIES (s) name, isProfileSubject
     EDIT Subjects OBJECT s
 ;
 
@@ -36,7 +35,7 @@ DESIGN editSubject{
             height = 60;
             MOVE PROPERTY (name(s));
             caption = 'Профиль';
-            MOVE PROPERTY (isSign(s));
+            MOVE PROPERTY (isProfileSubject(s));
         }
     }
 }

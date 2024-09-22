@@ -1,57 +1,45 @@
 MODULE Students;
-REQUIRE Teatchers, ClassDocument;
+REQUIRE Teatchers, Class;
 
-NAMESPACE ClassDocument;
+CLASS Student 'Ученик';
 
-CLASS NumberClassStudent 'Класс ученика': Header;
+surname 'Фамилия' = DATA STRING[16] (Student) NONULL ;
+firsname 'Имя' = DATA STRING[16](Student) NONULL ;
+lastname 'Отчество' = DATA STRING[16](Student) NONULL ;
+fullName 'Ученик' (Student s) = CONCAT ' ', surname(s), firsname(s), lastname(s);
 
-//ссылка на класс
-numberClass 'Номер класса' = DATA Class(NumberClassStudent);
-number 'Класс' (NumberClassStudent s) = numberAndLetter(numberClass(s));
-isSingClass 'Является ли профильным'(NumberClassStudent s) = isSign(numberClass(s));
-classTeach 'Классный руководитель'(NumberClassStudent s) = classTeacher(numberClass(s));
+in = DATA BOOLEAN (Class, Student) IN base;
 
-//countStudents 'Количество учеников в классе'(NumberClassStudent) = GROUP SUM 1 BY numberAndLetter(NumberClassStudent s);
-CLASS Students 'Ученики' : Row;
+classes = DATA Class(Student);
+class 'Класс ученика'(Student s) = numberAndLetter(classes(s));
+isProfile 'Является ли профильным' (Student s) = isSignClass(classes(s));
+profileSubject 'Профильный предмет'(Student s) = subjectName(classes(s));
+teacherClass 'Классный руководитель' (Student s) = classTeacher(classes(s));
 
-surname 'Фамилия' = DATA STRING[16] (Students) NONULL ;
-firstNume 'Имя' = DATA STRING[16] (Students) NONULL ;
-lastName 'Отчество' = DATA STRING[16] (Students) NONULL ;
+pp '№ в классе' (Student s) = PARTITION SUM 1 ORDER s BY class(s);
 
-fullName 'Ученик' (Students s) = CONCAT ' ', surname(s), firstNume(s),lastName(s);
-//numberClass 'Класс' = DATA Students(Class);
-
-
-
-//pp 'Номер ученика в классе' (Students s) = PARTITION SUM 1 ORDER s BY number(s);
-
-FORM editStudents 'Ученики'
-    OBJECTS h = NumberClassStudent PANEL 
-    PROPERTIES (h) number
-    OBJECTS r = Students 
-    PROPERTIES (r) surname, firstNume,lastName 
-    PROPERTIES (r) NEW ,DELETE 
-    EDIT NumberClassStudent OBJECT h
-    FILTERS header(r) = h
+count 'кол-во учеников  классе' (Class c) = GROUP SUM 1 BY classes(Student s);
+FORM viewStudent 'Ученики класса' 
+    OBJECTS c = Class LAST 
+    PROPERTIES (c) READONLY  numberAndLetter, isSignClass,subjectName, classTeacher, count
+    OBJECTS  s = Student
+    PROPERTIES (s) pp, fullName
+    PROPERTIES (s) class
+    PROPERTIES (s) NEWSESSION NEW , EDIT , DELETE 
+    FILTERS classes(s) = c
+    ORDERS class(s)
     ;
 
-FORM viewStudent 'Добавить ученика'
-    OBJECTS h = NumberClassStudent LAST 
-    PROPERTIES (h) READONLY number, isSingClass, classTeach
-    PROPERTIES (h) NEWSESSION NEW ,EDIT ,DELETE 
-    OBJECTS r = Students
-    PROPERTIES (r) surname, firstNume, lastName
-    FILTERS header(r) = h
-    ORDERS number(h)
+FORM editStudent 'Добавить ученика'
+    OBJECTS c = Student PANEL 
+    PROPERTIES (c) class
+    OBJECTS s = Student
+    PROPERTIES (s) surname, firsname, lastname
+    PROPERTIES (s) class
+    PROPERTIES (s) NEW , DELETE 
+    EDIT Student OBJECT c
+    FILTERS (s) = c
     ;
-FORM viewStudents 'Ученики школы'
-    OBJECTS s = NumberClassStudent
-    OBJECTS st = Students
-    PROPERTIES (s) number, isSingClass,classTeacher
-    PROPERTIES (st) fullName
-    FILTERS header(st) = s
-    ;
-DESIGN viewStudent {TOOLBARRIGHT (r){MOVE TOOLBARRIGHT (h);}}
 
 NAVIGATOR {
     students{

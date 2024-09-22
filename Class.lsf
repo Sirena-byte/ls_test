@@ -1,33 +1,51 @@
 MODULE Class;
-REQUIRE Teatchers;
+REQUIRE Teatchers, Utils;
 //------------------классы--------------------
-CLASS ClassType{
-    
+
+
+CLASS ClassType 'Профиль класса'{
+    physMath 'Физико-математический',
+    humanitarian 'Гуманитарный',
+    informationTechnology 'Информационно-технологический',
+    chemicalBiological 'Химико-биологический'
 }
 CLASS Class 'Класс';
 
 number 'Номер' = DATA NUMERIC[2,0] (Class)NONULL ;
 letter 'Буква' = DATA STRING[1] (Class) NONULL ;
-isSign 'Профиль' = DATA BOOLEAN (Class);
+isSignClass 'Профильный класс' = DATA BOOLEAN (Class);
 numberAndLetter 'Класс' (Class c) = CONCAT '', number(c), letter(c);
 
 teachers = DATA Teacher(Class);
 classTeacher 'Классный руководитель'(Class c) = fullName(teachers(c));
+subjects 'Предметы' = DATA Subjects(Class) ;
+subjectName 'профильный предмет' (Class c) = name(subjects(c));
+//profileSubjects 'Профильные предметы'(Subjects s) = profileSubject(subjects(s));
+//isSingSubj 'Является ли профильным'(Subjects s) = isSingSubj(subjects(s));
+CONSTRAINT SETCHANGED (subjects(Class c)) 
+    //*ограничение будет применяться к набору предметов, связанных с классом. Каждый раз, когда //происходит изменение в списке предметов для данного класса, будет выполнена проверка этого //ограничения.*/ 
+    AND NOT isSignClass(c)
+    //*Проверяет, является ли класс c профильным, то есть имеет ли он флаг, указывающий на то, что //это профильный класс. Если isSignClass(c) возвращает TRUE, то NOT isSignClass(c) становится //FALSE, и ограничение не выполняется*/ 
+    
+    CHECKED BY subjects[Class]   MESSAGE 'Предмет не профильный';//*ограничение будет применяться к набору предметов, связанных с классом. Каждый раз, когда //происходит изменение в списке предметов для данного класса, будет выполнена проверка этого //ограничения.*/
+
+//CONSTRAINT (teachers(Class c)) AND NOT fullName(Teacher t) != classTeacher(c) CHECKED BY teachers[Class] MESSAGE  'Учитель уже является классным руководителем другого класса';
 
 FORM viewClasses 'Классы'
     OBJECTS  c = Class
-    PROPERTIES (c) READONLY isSign, numberAndLetter, classTeacher
+    PROPERTIES (c) READONLY numberAndLetter, isSignClass, subjectName, classTeacher
     PROPERTIES  (c) NEWSESSION NEW , EDIT , DELETE
 ;
 
 FORM editClass 'Класс'
     OBJECTS c = Class PANEL
-    PROPERTIES (c)  number, letter, isSign, classTeacher
+    PROPERTIES (c)  number, letter, isSignClass, classTeacher
+    PROPERTIES (c) subjectName
     EDIT Class OBJECT c
 ;
 FORM listClass 'Класс'
     OBJECTS c = Class
-    PROPERTIES (c) READONLY numberAndLetter, isSign
+    PROPERTIES (c) READONLY numberAndLetter, isSignClass
     LIST Class OBJECT c
 ;
 NAVIGATOR {

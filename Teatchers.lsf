@@ -20,14 +20,14 @@ subject = DATA Subjects(Teacher);
 //ссылка на учителя
 teacher = DATA Teacher(Subjects) ;
 
-subjectName 'Ведет предмет' (Teacher t) = name(subject(t)) ;
+subjectName 'Название предмета' (Teacher t) = name(subject(t)) ;
 in 'ВКЛ' = DATA BOOLEAN (Teacher,Subjects) IN base;
-subjectaT 'Предметы учителя' (Teacher t) = GROUP CONCAT name(Subjects s) IF in(t, s),' ,'
+subjectsTeacher 'Предметы учителя' (Teacher t) = GROUP CONCAT name(Subjects s) IF in(t, s),' ,'
 ORDER name(s), t CHARWIDTH 30;
 
 FORM viewTeachers 'Учителя'
     OBJECTS teacher = Teacher
-    PROPERTIES (teacher) READONLY fullName, subjectaT //subjectName
+    PROPERTIES (teacher) READONLY fullName, subjectsTeacher //subjectName
     PROPERTIES (teacher) NEWSESSION NEW, EDIT ,DELETE
 
 ;

@@ -6,8 +6,8 @@ name 'Название предмета' = DATA STRING[25] (Subjects) NONULL ;
 isProfileSubject 'Профильный предмет' = DATA BOOLEAN (Subjects) ;
 //isHighSchool 'Старшие классы' = DATA BOOLEAN (Subjects);
 //проверка на уникальность
-unique  = GROUP AGGR Subjects o BY name(o);
-//isSingClass 'Является ли профильным'(NumberClassStudent s) = isSignClass(numberClass(s));
+unique  = GROUP AGGR Subjects o BY name(o) ,isProfileSubject(o);
+
 FORM viewSubjects 'Предметы'
     OBJECTS s = Subjects
     PROPERTIES (s) READONLY isProfileSubject, name

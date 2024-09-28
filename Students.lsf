@@ -1,5 +1,5 @@
 MODULE Students;
-REQUIRE Teatchers, Class;
+REQUIRE  Class;
 
 CLASS Student 'Ученик';
 
@@ -19,27 +19,27 @@ teacherClass 'Классный руководитель' (Student s) = classTeac
 pp '№ в классе' (Student s) = PARTITION SUM 1 ORDER s BY class(s);
 
 count 'кол-во учеников  классе' (Class c) = GROUP SUM 1 BY classes(Student s);
-FORM viewStudent 'Ученики класса' 
-    OBJECTS c = Class LAST 
+FORM viewStudent 'Ученики класса'
+    OBJECTS c = Class LAST
     PROPERTIES (c) READONLY  numberAndLetter, isSignClass,subjectName, classTeacher, count
     OBJECTS  s = Student
     PROPERTIES (s) pp, fullName
     PROPERTIES (s) class
-    PROPERTIES (s) NEWSESSION NEW , EDIT , DELETE 
+    PROPERTIES (s) NEWSESSION NEW , EDIT , DELETE
     FILTERS classes(s) = c
     ORDERS class(s)
-    ;
+;
 
 FORM editStudent 'Добавить ученика'
-    OBJECTS c = Student PANEL 
-    PROPERTIES (c) class
+    OBJECTS c = Student PANEL
+    PROPERTIES (c) class 
     OBJECTS s = Student
     PROPERTIES (s) surname, firsname, lastname
-    PROPERTIES (s) class
-    PROPERTIES (s) NEW , DELETE 
+    //PROPERTIES (s) class
+    PROPERTIES (s) NEW , DELETE
     EDIT Student OBJECT c
     FILTERS (s) = c
-    ;
+;
 
 NAVIGATOR {
     students{

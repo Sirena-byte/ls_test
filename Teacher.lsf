@@ -1,5 +1,5 @@
-MODULE Teatchers;
-REQUIRE  Subjects, AppMenu, Utils;
+MODULE Teacher;
+REQUIRE  Subjects;
 
 CLASS TeacherType 'Тип учителя'{
     primaryEducation 'Учитель начальных классов',
@@ -17,13 +17,14 @@ teacherTypeName 'Тип учителя' (Teacher teacher) = staticCaption(teache
 
 //ссылка на предметы
 subject = DATA Subjects(Teacher);
-//ссылка на учителя
-teacher = DATA Teacher(Subjects) ;
+
 
 subjectName 'Название предмета' (Teacher t) = name(subject(t)) ;
 in 'ВКЛ' = DATA BOOLEAN (Teacher,Subjects) IN base;
 subjectsTeacher 'Предметы учителя' (Teacher t) = GROUP CONCAT name(Subjects s) IF in(t, s),' ,'
 ORDER name(s), t CHARWIDTH 30;
+
+
 
 FORM viewTeachers 'Учителя'
     OBJECTS teacher = Teacher
@@ -70,7 +71,7 @@ DESIGN editTeacher{
 }
 
 NAVIGATOR {
-    teatchers{
+    teachers{
         NEW FORM viewTeachers;
     }
 }

@@ -1,5 +1,6 @@
 MODULE Class;
-REQUIRE Teatchers, Utils;
+REQUIRE  Utils,Teacher;
+
 //------------------классы--------------------
 
 
@@ -20,16 +21,11 @@ teachers = DATA Teacher(Class);
 classTeacher 'Классный руководитель'(Class c) = fullName(teachers(c));
 subjects 'Предметы' = DATA Subjects(Class) ;
 subjectName 'профильный предмет' (Class c) = name(subjects(c));
-//profileSubjects 'Профильные предметы'(Subjects s) = profileSubject(subjects(s));
-//isSingSubj 'Является ли профильным'(Subjects s) = isSingSubj(subjects(s));
-CONSTRAINT SETCHANGED (subjects(Class c)) 
-    //*ограничение будет применяться к набору предметов, связанных с классом. Каждый раз, когда //происходит изменение в списке предметов для данного класса, будет выполнена проверка этого //ограничения.*/ 
-    AND NOT isSignClass(c)
-    //*Проверяет, является ли класс c профильным, то есть имеет ли он флаг, указывающий на то, что //это профильный класс. Если isSignClass(c) возвращает TRUE, то NOT isSignClass(c) становится //FALSE, и ограничение не выполняется*/ 
-    
-    CHECKED BY subjects[Class]   MESSAGE 'Предмет не профильный';//*ограничение будет применяться к набору предметов, связанных с классом. Каждый раз, когда //происходит изменение в списке предметов для данного класса, будет выполнена проверка этого //ограничения.*/
+//isProfileSubjects 'Профильные предметы'(Subjects s) = isProfileSubject(subjects(s));
 
-//CONSTRAINT (teachers(Class c)) AND NOT fullName(Teacher t) != classTeacher(c) CHECKED BY teachers[Class] MESSAGE  'Учитель уже является классным руководителем другого класса';
+CONSTRAINT SETCHANGED (subjects(Class c)) AND NOT isSignClass(c) CHECKED BY subjects[Class]  MESSAGE 'Предмет не профильный';
+CONSTRAINT SETCHANGED(teachers (Class c)) AND (number(c)) < 5 AND NOT teacherType(teachers(c)) = TeacherType.primaryEducation CHECKED BY teachers[Class] MESSAGE 'Учитель младших классов не может быть выбран';//+
+CONSTRAINT SETCHANGED(teachers (Class c)) AND (number(c)) > 4 AND NOT teacherType(teachers(c)) = TeacherType.basicAndSecondaryEducation CHECKED BY teachers[Class]   MESSAGE 'Учитель старших классов не может вести младшие';//+
 
 FORM viewClasses 'Классы'
     OBJECTS  c = Class

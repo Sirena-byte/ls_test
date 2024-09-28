@@ -1,11 +1,10 @@
 MODULE AppMenu;
-
 NAVIGATOR {
     NEW FOLDER move 'Справочник' WINDOW toolbar FIRST {
         NEW FOLDER subjects 'Предметы';
         NEW FOLDER classes 'Классы';
-        NEW FOLDER teatchers 'Учителя';
-        NEW FOLDER student 'Ученики';
+        NEW FOLDER teachers 'Учителя!';
+        //NEW FOLDER student 'Ученики';
       
     }
     NEW FOLDER classSt 'Ученики класса' WINDOW toolbar AFTER move{

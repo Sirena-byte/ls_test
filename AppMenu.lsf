@@ -3,12 +3,12 @@ NAVIGATOR {
     NEW FOLDER move 'Справочник' WINDOW toolbar FIRST {
         NEW FOLDER subjects 'Предметы';
         NEW FOLDER classes 'Классы';
-        NEW FOLDER teachers 'Учителя!';
-        //NEW FOLDER student 'Ученики';
+        NEW FOLDER teachers 'Учителя';
       
     }
     NEW FOLDER classSt 'Ученики класса' WINDOW toolbar AFTER move{
         NEW FOLDER students 'Ученики';
+        NEW FOLDER class 'Классы';
     }
     
 }

@@ -6,7 +6,7 @@ CLASS TeacherType 'Тип учителя'{
     basicAndSecondaryEducation 'Учитель старших классов'
 }
 
-CLASS Teacher 'Учителя';
+CLASS Teacher 'Учитель';
 surname 'Фамилия' = DATA STRING[16] (Teacher) NONULL ;
 firstName 'Имя' = DATA STRING[16] (Teacher) NONULL ;
 lastName 'Отчество' = DATA STRING[16] (Teacher) NONULL ;
@@ -20,37 +20,33 @@ subject = DATA Subjects(Teacher);
 
 
 subjectName 'Название предмета' (Teacher t) = name(subject(t)) ;
-in 'ВКЛ' = DATA BOOLEAN (Teacher,Subjects) IN base;
+in 'ВКЛ' = DATA BOOLEAN (Teacher,Subjects)  IN base ;
 subjectsTeacher 'Предметы учителя' (Teacher t) = GROUP CONCAT name(Subjects s) IF in(t, s),' ,'
 ORDER name(s), t CHARWIDTH 30;
 
-
-
 FORM viewTeachers 'Учителя'
-    OBJECTS teacher = Teacher
-    PROPERTIES (teacher) READONLY fullName, subjectsTeacher //subjectName
-    PROPERTIES (teacher) NEWSESSION NEW, EDIT ,DELETE
+    OBJECTS t = Teacher
+    PROPERTIES (t) READONLY fullName, subjectsTeacher //subjectName
+    PROPERTIES (t) NEWSESSION NEW, EDIT ,DELETE
 
 ;
 EXTEND FORM viewTeachers
-    PROPERTIES (teacher) READONLY teacherTypeName
+    PROPERTIES (t) READONLY teacherTypeName
 ;
+
+
 FORM editTeacher 'Добавлениие учителя'
     OBJECTS t = Teacher PANEL
     PROPERTIES (t) surname, firstName, lastName
-
-    OBJECTS s = Subjects
-    PROPERTIES in(t,s)
-    PROPERTIES (s) name
+    PROPERTIES (t)teacherTypeName
     EDIT Teacher OBJECT t
 ;
 
-EXTEND FORM editTeacher
-    PROPERTIES (t)teacherTypeName;
-
-//CONSTRAINT SETCHANGED(teacher(Subjects t)) AND
-//    teacherType(teacher(t)) = TeacherType.primaryEducation
-//    MESSAGE 'Профильным учителем может являться только учитель старших классов';
+  EXTEND FORM editTeacher 
+    OBJECTS s = Subjects 
+    PROPERTIES = in(t,s) IF teacherTypeName(t) != 'Учитель начальных классов'
+    PROPERTIES = name(s) IF teacherTypeName(t) != 'Учитель начальных классов'
+; // не совсем то, что я хочу, но отчасти свою задачу выполняет - предметы выбрать нельзя, но сам объект создается
 
 FORM listTeacher 'Учителя'
     OBJECTS teacher = Teacher

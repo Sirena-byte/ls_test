@@ -1,9 +1,6 @@
 MODULE Class;
 REQUIRE  Utils,Teacher;
 
-//------------------классы--------------------
-
-
 CLASS ClassType 'Профиль класса'{
     physMath 'Физико-математический',
     humanitarian 'Гуманитарный',
@@ -12,25 +9,32 @@ CLASS ClassType 'Профиль класса'{
 }
 CLASS Class 'Класс';
 
-number 'Номер' = DATA NUMERIC[2,0] (Class)NONULL ;
-letter 'Буква' = DATA STRING[1] (Class) NONULL ;
-isSignClass 'Профильный класс' = DATA BOOLEAN (Class);
-numberAndLetter 'Класс' (Class c) = CONCAT '', number(c), letter(c);
+number 'Номер' = DATA INTEGER (Class)NONULL;
+letter 'Буква' = DATA STRING[1] (Class) NONULL;
+isSignClass 'Профильный класс' = DATA BOOLEAN (Class) ;
+numberAndLetter 'Класс' (Class c) = CONCAT '', number(c), letter(c) IN base;
 
 teachers = DATA Teacher(Class);
 classTeacher 'Классный руководитель'(Class c) = fullName(teachers(c));
 subjects 'Предметы' = DATA Subjects(Class) ;
 subjectName 'профильный предмет' (Class c) = name(subjects(c));
-//isProfileSubjects 'Профильные предметы'(Subjects s) = isProfileSubject(subjects(s));
-
-CONSTRAINT SETCHANGED (subjects(Class c)) AND NOT isSignClass(c) CHECKED BY subjects[Class]  MESSAGE 'Предмет не профильный';
+isSubjectProfile 'является профильным предметом' (Class c) = isProfileSubject(subjects(c));
+class 'Классы' = DATA Class(Teacher);
+unique = GROUP AGGR Class c BY number(c),letter(c);
+uniqueClassTeacher = GROUP AGGR Class c BY classTeacher(c);
+CONSTRAINT SETCHANGED (subjects(Class c)) AND NOT isSignClass(c) CHECKED BY subjects[Class]   MESSAGE 'Для базового класса нельзя выбрать профильный предмет';//+
+CONSTRAINT SETCHANGED (subjects(Class c)) AND number(c) < 5 CHECKED BY subjects[Class]   MESSAGE 'Для младших классов нельзя выбрать профильный предмет';//+
+CONSTRAINT SETCHANGED(subjects(Class c)) AND NOT isProfileSubject(subjects(c)) CHECKED BY subjects[Class] MESSAGE 'Предмет не профильный';//+
 CONSTRAINT SETCHANGED(teachers (Class c)) AND (number(c)) < 5 AND NOT teacherType(teachers(c)) = TeacherType.primaryEducation CHECKED BY teachers[Class] MESSAGE 'Учитель младших классов не может быть выбран';//+
 CONSTRAINT SETCHANGED(teachers (Class c)) AND (number(c)) > 4 AND NOT teacherType(teachers(c)) = TeacherType.basicAndSecondaryEducation CHECKED BY teachers[Class]   MESSAGE 'Учитель старших классов не может вести младшие';//+
+CONSTRAINT isSignClass( Class c) AND number(c) < 4 MESSAGE 'Профильными могут быть только старшие классы';
+
 
 FORM viewClasses 'Классы'
     OBJECTS  c = Class
     PROPERTIES (c) READONLY numberAndLetter, isSignClass, subjectName, classTeacher
     PROPERTIES  (c) NEWSESSION NEW , EDIT , DELETE
+    ORDERS numberAndLetter(c)
 ;
 
 FORM editClass 'Класс'

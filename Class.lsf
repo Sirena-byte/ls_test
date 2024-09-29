@@ -1,12 +1,6 @@
 MODULE Class;
 REQUIRE  Utils,Teacher;
 
-CLASS ClassType 'Профиль класса'{
-    physMath 'Физико-математический',
-    humanitarian 'Гуманитарный',
-    informationTechnology 'Информационно-технологический',
-    chemicalBiological 'Химико-биологический'
-}
 CLASS Class 'Класс';
 
 number 'Номер' = DATA INTEGER (Class)NONULL;

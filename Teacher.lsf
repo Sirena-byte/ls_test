@@ -60,8 +60,6 @@ DESIGN editTeacher{
             horizontal = TRUE ;
             caption = 'Ведет предмет';
             height = 60;
-            //MOVE PROPERTY (subjectName(t)) {caption = 'Предмет';}
-         
         }
     }
 }

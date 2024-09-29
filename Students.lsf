@@ -24,10 +24,8 @@ FORM viewStudent 'Ученики класса'
     PROPERTIES (c) READONLY  numberAndLetter, isSignClass,subjectName, classTeacher, count
     OBJECTS  s = Student
     PROPERTIES (s) pp, fullName
-    //PROPERTIES (s) class
     PROPERTIES (s) NEWSESSION NEW , EDIT , DELETE
     FILTERS classes(s) = c
-    //ORDERS class(s)
     
 ;
 
@@ -36,7 +34,6 @@ FORM editStudent 'Добавить ученика'
     PROPERTIES (c) class 
     OBJECTS s = Student
     PROPERTIES (s) surname, firsname, lastname
-    //PROPERTIES (s) class
     PROPERTIES (s) NEW , DELETE
     EDIT Student OBJECT c
     FILTERS (s) = c

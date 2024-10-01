@@ -6,7 +6,7 @@ CLASS Student 'Ученик';
 surname 'Фамилия' = DATA STRING[16] (Student) NONULL ;
 firsname 'Имя' = DATA STRING[16](Student) NONULL ;
 lastname 'Отчество' = DATA STRING[16](Student) NONULL ;
-fullName 'Ученик' (Student s) = CONCAT ' ', surname(s), firsname(s), lastname(s);
+fullName 'ФИО ученика' (Student s) = CONCAT ' ', surname(s), firsname(s), lastname(s);
 
 in = DATA BOOLEAN (Class, Student) IN base;
 
@@ -17,27 +17,38 @@ profileSubject 'Профильный предмет'(Student s) = subjectName(cl
 teacherClass 'Классный руководитель' (Student s) = classTeacher(classes(s));
 
 pp '№ в классе' (Student s) = PARTITION SUM 1 ORDER s BY class(s);
-
 count 'кол-во учеников  классе' (Class c) = GROUP SUM 1 BY classes(Student s);
+
 FORM viewStudent 'Ученики класса'
     OBJECTS c = Class LAST
     PROPERTIES (c) READONLY  numberAndLetter, isSignClass,subjectName, classTeacher, count
     OBJECTS  s = Student
-    PROPERTIES (s) pp, fullName
-    PROPERTIES (s) NEWSESSION NEW , EDIT , DELETE
+    PROPERTIES (s) pp, surname, firsname,lastname
+    PROPERTIES (s) NEW , EDIT , DELETE
     FILTERS classes(s) = c
     
 ;
 
 FORM editStudent 'Добавить ученика'
     OBJECTS c = Student PANEL
-    PROPERTIES (c) class 
+    PROPERTIES (c) class  
     OBJECTS s = Student
     PROPERTIES (s) surname, firsname, lastname
-    PROPERTIES (s) NEW , DELETE
+    PROPERTIES (s) DELETE
     EDIT Student OBJECT c
     FILTERS (s) = c
 ;
+DESIGN viewStudent{
+    OBJECTS {
+        NEW panel{
+            fill = 1;
+            horizontal = TRUE ;
+            MOVE BOX (c){width = 70;caption = 'Классы';}
+            MOVE BOX (s){width = 30;caption = 'Ученики';}
+        }
+    }
+    PROPERTY (isSignClass(c)){charWidth = 15;}
+}
 
 NAVIGATOR {
     students{

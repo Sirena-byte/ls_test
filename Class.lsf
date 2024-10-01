@@ -13,7 +13,7 @@ classTeacher 'Классный руководитель'(Class c) = fullName(tea
 subjects 'Предметы' = DATA Subjects(Class) ;
 subjectName 'профильный предмет' (Class c) = name(subjects(c));
 isSubjectProfile 'является профильным предметом' (Class c) = isProfileSubject(subjects(c));
-class 'Классы' = DATA Class(Teacher);
+
 unique = GROUP AGGR Class c BY number(c),letter(c);
 uniqueClassTeacher = GROUP AGGR Class c BY classTeacher(c);
 CONSTRAINT SETCHANGED (subjects(Class c)) AND NOT isSignClass(c) CHECKED BY subjects[Class]   MESSAGE 'Для базового класса нельзя выбрать профильный предмет';//+
@@ -42,6 +42,8 @@ FORM listClass 'Класс'
     PROPERTIES (c) READONLY numberAndLetter, isSignClass
     LIST Class OBJECT c
 ;
+
+
 NAVIGATOR {
     move{
         NEW FORM viewClasses;
